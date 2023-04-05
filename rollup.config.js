@@ -11,6 +11,7 @@ import autoprefixer from 'autoprefixer';
 import copy from 'rollup-plugin-copy';
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 import { visualizer } from 'rollup-plugin-visualizer';
+import json from '@rollup/plugin-json';
 
 // config from package.json
 import pkg from './package.json';
@@ -47,6 +48,7 @@ module.exports = ({
     'css-vars-ponyfill',
     'date-fns',
     'dompurify',
+    '@ffmpeg/ffmpeg',
   ],
   plugins: [
     postcss({
@@ -61,6 +63,7 @@ module.exports = ({
       extract: 'dist/index.css',
       extensions: ['.sass', '.scss', '.css'],
     }),
+    json(),
     replace({
       preventAssignment: false,
       exclude: 'node_modules/**',

@@ -21,6 +21,10 @@ module.exports = {
       test: /\.svg$/,
       use: ["@svgr/webpack"],
     });
+    config.module.rules.push({
+      test: /\.js$/,
+      loader: require.resolve('@open-wc/webpack-import-meta-loader'),
+    });
     return config;
   },
 };
