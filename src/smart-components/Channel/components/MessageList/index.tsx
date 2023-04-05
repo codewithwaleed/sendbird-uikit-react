@@ -12,6 +12,9 @@ import { getMessagePartsInfo } from './getMessagePartsInfo';
 import UnreadCount from '../UnreadCount';
 import FrozenNotification from '../FrozenNotification';
 import { SCROLL_BUFFER } from '../../../../utils/consts';
+import { UserMessage } from '@sendbird/chat/message';
+import useSendbirdStateContext from '../../../../hooks/useSendbirdStateContext';
+import { MessageProvider } from '../../../Message/context/MessageProvider';
 
 export interface MessageListProps {
   className?: string;
@@ -48,6 +51,7 @@ const MessageList: React.FC<MessageListProps> = ({
     loading,
     unreadSince,
   } = useChannelContext();
+  const store = useSendbirdStateContext();
   const [scrollBottom, setScrollBottom] = useState(0);
 
   const onScroll = (e) => {
@@ -164,17 +168,19 @@ const MessageList: React.FC<MessageListProps> = ({
               currentMessage: m,
               currentChannel: currentGroupChannel,
             });
+            const isByMe = (m as UserMessage)?.sender?.userId === store?.config?.userId;
             return (
-              <Message
-                key={m?.messageId}
-                handleScroll={handleScroll}
-                renderMessage={renderMessage}
-                message={m}
-                hasSeparator={hasSeparator}
-                chainTop={chainTop}
-                chainBottom={chainBottom}
-                renderCustomSeparator={renderCustomSeparator}
-              />
+              <MessageProvider message={m} key={m?.messageId} isByMe={isByMe}>
+                <Message
+                  handleScroll={handleScroll}
+                  renderMessage={renderMessage}
+                  message={m}
+                  hasSeparator={hasSeparator}
+                  chainTop={chainTop}
+                  chainBottom={chainBottom}
+                  renderCustomSeparator={renderCustomSeparator}
+                />
+              </MessageProvider>
             );
           })}
           {/* show frozen notifications */}
