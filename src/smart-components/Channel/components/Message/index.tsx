@@ -25,6 +25,7 @@ import RemoveMessageModal from '../RemoveMessageModal';
 import { MessageInputKeys } from '../../../../ui/MessageInput/const';
 import { EveryMessage, RenderCustomSeparatorProps, RenderMessageProps } from '../../../../types';
 import { useLocalization } from '../../../../lib/LocalizationContext';
+import { MessageProvider } from '../../../Message/context/MessageProvider';
 
 type MessageUIProps = {
   message: EveryMessage;
@@ -108,6 +109,9 @@ const Message = ({
     || isDisabledBecauseFrozen(currentGroupChannel)
     || isDisabledBecauseMuted(currentGroupChannel)
     || !isOnline;
+
+  // @ts-ignore
+  const senderId = message?.sender?.userId;
 
   useEffect(() => {
     if (mentionedUsers?.length >= maxUserMentionCount) {
@@ -304,73 +308,75 @@ const Message = ({
   }
 
   return (
-    <div
-      className={getClassName([
-        'sendbird-msg-hoc sendbird-msg--scroll-ref',
-        isAnimated ? 'sendbird-msg-hoc__animated' : '',
-        isHighlighted ? 'sendbird-msg-hoc__highlighted' : '',
-      ])}
-      style={{ marginBottom: '2px' }}
-      ref={useMessageScrollRef}
-    >
-      {/* date-separator */}
-      {
-        hasSeparator && (renderedCustomSeparator || (
-          <DateSeparator>
-            <Label type={LabelTypography.CAPTION_2} color={LabelColors.ONBACKGROUND_2}>
-              {format(message.createdAt, 'MMMM dd, yyyy', {
-                locale: dateLocale,
-              })}
-            </Label>
-          </DateSeparator>
-        ))
-      }
-      {/* Message */}
-      {
-        renderMessageContent?.() || (
-          <MessageContent
-            className="sendbird-message-hoc__message-content"
-            userId={userId}
-            scrollToMessage={scrollToMessage}
-            channel={currentGroupChannel}
-            message={message}
-            disabled={!isOnline}
-            chainTop={chainTop}
-            chainBottom={chainBottom}
-            isReactionEnabled={isReactionEnabled}
-            replyType={replyType}
-            threadReplySelectType={threadReplySelectType}
-            nicknamesMap={nicknamesMap}
-            emojiContainer={emojiContainer}
-            showEdit={setShowEdit}
-            showRemove={setShowRemove}
-            showFileViewer={setShowFileViewer}
-            resendMessage={resendMessage}
-            toggleReaction={toggleReaction}
-            setQuoteMessage={setQuoteMessage}
-            onReplyInThread={onReplyInThread}
-            onQuoteMessageClick={onQuoteMessageClick}
-          />
-        )
-      }
-      {/* Modal */}
-      {
-        showRemove && (
-          <RemoveMessageModal
-            message={message}
-            onCancel={() => setShowRemove(false)}
-          />
-        )
-      }
-      {
-        showFileViewer && (
-          <FileViewer
-            message={message as FileMessage}
-            onCancel={() => setShowFileViewer(false)}
-          />
-        )
-      }
-    </div>
+    <MessageProvider message={message} isByMe={userId === senderId}>
+      <div
+        className={getClassName([
+          'sendbird-msg-hoc sendbird-msg--scroll-ref',
+          isAnimated ? 'sendbird-msg-hoc__animated' : '',
+          isHighlighted ? 'sendbird-msg-hoc__highlighted' : '',
+        ])}
+        style={{ marginBottom: '2px' }}
+        ref={useMessageScrollRef}
+      >
+        {/* date-separator */}
+        {
+          hasSeparator && (renderedCustomSeparator || (
+            <DateSeparator>
+              <Label type={LabelTypography.CAPTION_2} color={LabelColors.ONBACKGROUND_2}>
+                {format(message.createdAt, 'MMMM dd, yyyy', {
+                  locale: dateLocale,
+                })}
+              </Label>
+            </DateSeparator>
+          ))
+        }
+        {/* Message */}
+        {
+          renderMessageContent?.() || (
+            <MessageContent
+              className="sendbird-message-hoc__message-content"
+              userId={userId}
+              scrollToMessage={scrollToMessage}
+              channel={currentGroupChannel}
+              message={message}
+              disabled={!isOnline}
+              chainTop={chainTop}
+              chainBottom={chainBottom}
+              isReactionEnabled={isReactionEnabled}
+              replyType={replyType}
+              threadReplySelectType={threadReplySelectType}
+              nicknamesMap={nicknamesMap}
+              emojiContainer={emojiContainer}
+              showEdit={setShowEdit}
+              showRemove={setShowRemove}
+              showFileViewer={setShowFileViewer}
+              resendMessage={resendMessage}
+              toggleReaction={toggleReaction}
+              setQuoteMessage={setQuoteMessage}
+              onReplyInThread={onReplyInThread}
+              onQuoteMessageClick={onQuoteMessageClick}
+            />
+          )
+        }
+        {/* Modal */}
+        {
+          showRemove && (
+            <RemoveMessageModal
+              message={message}
+              onCancel={() => setShowRemove(false)}
+            />
+          )
+        }
+        {
+          showFileViewer && (
+            <FileViewer
+              message={message as FileMessage}
+              onCancel={() => setShowFileViewer(false)}
+            />
+          )
+        }
+      </div>
+    </MessageProvider>
   );
 };
 
